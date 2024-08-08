@@ -1,0 +1,15 @@
+mod pdk;
+
+use extism_pdk::*;
+
+// start with something simple
+fn greet(name: String) -> FnResult<String> {
+    Ok(format!("Hello, {}!", name))
+}
+
+fn add(input: pdk::Add) -> FnResult<pdk::Sum> {
+    Ok(pdk::Sum {
+        value: input.left + input.right,
+    })
+}
+

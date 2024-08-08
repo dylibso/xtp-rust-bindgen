@@ -1,2 +1,7 @@
 /target
 Cargo.lock
+node_modules
+dist
+tests/output
+bundle
+bundle.zip
