@@ -1,15 +1,12 @@
 mod pdk;
+use pdk::*;
 
 use extism_pdk::*;
 
-// start with something simple
-fn greet(name: String) -> FnResult<String> {
-    Ok(format!("Hello, {}!", name))
+<% schema.exports.forEach(ex => { -%>
+
+pub(crate) fn <%= camelToSnakeCase(ex.name) %>(<%if (ex.input) { %>_input: <%- toRustType(ex.input) %> <% } %>) -> Result<(), Error> {
+    todo!("<%= camelToSnakeCase(ex.name) %>")
 }
 
-fn add(input: pdk::Add) -> FnResult<pdk::Sum> {
-    Ok(pdk::Sum {
-        value: input.left + input.right,
-    })
-}
-
+<% }) %>
