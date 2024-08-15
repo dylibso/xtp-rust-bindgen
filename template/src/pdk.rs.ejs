@@ -60,7 +60,8 @@ pub struct <%= schema.name %> {
 		<% if (p.description) { -%>
 		// <%- formatCommentBlock(p.description, "// ") %>
 		<% } -%>
-		<%= makePublic(p.name) %>: <%- p.nullable ? `Option<${toRustType(p)}>` : toRustType(p) %>,
+    #[serde(rename = "<%= p.name %>")]
+		<%= makePublic(camelToSnakeCase(p.name)) %>: <%- p.nullable ? `Option<${toRustType(p)}>` : toRustType(p) %>,
 		<% }) %>
 }
     <% } %>
