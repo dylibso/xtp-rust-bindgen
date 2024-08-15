@@ -27,7 +27,11 @@ macro_rules! try_input {
 
 #[no_mangle]
 pub extern "C" fn <%= ex.name %>() -> i32 {
+    <% if (ex.output && ex.output.contentType === "application/json") { %>
+    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>try_input!() <% } %>).and_then(|x| output(Json(x)));
+    <% } else { %>
     let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>try_input!() <% } %>).and_then(output);
+    <% } %>
     match ret {
         Ok(()) => {
             0

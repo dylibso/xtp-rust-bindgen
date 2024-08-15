@@ -25,7 +25,6 @@ function toRustType(property: Property): string {
       return "serde_json::Map";
     case "array":
       if (!property.items) return "Vec<serde_json::Value>";
-      // TODO this is not quite right to force cast
       return `Vec<${toRustType(property.items as Property)}>`;
     case "buffer":
       return "Vec<u8>";
