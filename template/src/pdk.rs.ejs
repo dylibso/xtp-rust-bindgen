@@ -47,7 +47,7 @@ pub extern "C" fn <%= ex.name %>() -> i32 {
     <% if (schema.enum) { %>
 #[derive(Serialize, Deserialize, FromBytes, ToBytes)]
 #[encoding(Json)]
-pub enum <%= schema.name %> {
+pub enum <%= capitalize(schema.name) %> {
     <% schema.enum.forEach(variant => { -%>
     <%= capitalize(variant) %>,
 		<% }) %>
@@ -55,7 +55,7 @@ pub enum <%= schema.name %> {
     <% } else { %>
 #[derive(Serialize, Deserialize, FromBytes, ToBytes)]
 #[encoding(Json)]
-pub struct <%= schema.name %> {
+pub struct <%= capitalize(schema.name) %> {
     <% schema.properties.forEach(p => { -%>
 		<% if (p.description) { -%>
 		// <%- formatCommentBlock(p.description, "// ") %>
