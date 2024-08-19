@@ -22,7 +22,7 @@ function toRustType(property: Property): string {
     case "boolean":
       return "bool";
     case "object":
-      return "serde_json::Map";
+      return "std::collections::HashMap<String, serde_json::Value>";
     case "array":
       if (!property.items) return "Vec<serde_json::Value>";
       return `Vec<${toRustType(property.items as Property)}>`;
@@ -54,7 +54,7 @@ function jsonWrappedRustType(property: Property): string {
     case "boolean":
       return "Json<bool>";
     case "object":
-      return "Json<serde_json::Map>";
+      return "Json<std::collections::HashMap<String, serde_json::Value>>";
     case "array":
       if (!property.items) return "Json<Vec<serde_json::Value>>";
       // TODO this is not quite right to force cast
