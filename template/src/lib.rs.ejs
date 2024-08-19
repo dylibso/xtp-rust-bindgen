@@ -6,7 +6,7 @@ use extism_pdk::*;
 <% schema.exports.forEach(ex => { -%>
 
 pub(crate) fn <%= camelToSnakeCase(ex.name) %>(<%if (ex.input) { %>_input: <%- toRustType(ex.input) %> <% } %>) -> Result<<%if (ex.output) { %> <%- toRustType(ex.output) %> <% } else { %> () <% } %>, Error> {
-	<% if (featureFlags['stub-with-code-samples'] && codeSamples(ex, 'go').length > 0) { -%>
+	<% if (featureFlags['stub-with-code-samples'] && codeSamples(ex, 'rust').length > 0) { -%>
 		<%- codeSamples(ex, 'rust')[0].source %>
 	<% } else { -%>
     todo!("Implement <%= camelToSnakeCase(ex.name) %>")
