@@ -61,6 +61,7 @@ pub struct <%= capitalize(schema.name) %> {
 		// <%- formatCommentBlock(p.description, "// ") %>
 		<% } -%>
     #[serde(rename = "<%= p.name %>")]
+    <% if (p.nullable) { %>#[serde(default)]<% } %>
 		<%= makePublic(camelToSnakeCase(p.name)) %>: <%- p.nullable ? `Option<${toRustType(p)}>` : toRustType(p) %>,
 		<% }) %>
 }
