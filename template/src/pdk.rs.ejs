@@ -49,6 +49,7 @@ pub extern "C" fn <%= ex.name %>() -> i32 {
 #[encoding(Json)]
 pub enum <%= capitalize(schema.name) %> {
     <% schema.enum.forEach(variant => { -%>
+    #[serde(rename = "<%- variant %>")]
     <%= capitalize(variant) %>,
 		<% }) %>
 }
@@ -64,6 +65,11 @@ pub struct <%= capitalize(schema.name) %> {
     <% if (p.nullable) { %>#[serde(default)]<% } %>
 		<%= makePublic(camelToSnakeCase(p.name)) %>: <%- p.nullable ? `Option<${toRustType(p)}>` : toRustType(p) %>,
 		<% }) %>
+
+    <% if (schema.additionalProperties) { %>
+    #[serde(flatten)]
+    additional_properties: std::collections::HashMap<String, <%- schema.additionalProperties.type ? toRustType(schema.additionalProperties.type) : "serde_json::Value" %>>,
+    <% } %>
 }
     <% } %>
 <% }); %>
