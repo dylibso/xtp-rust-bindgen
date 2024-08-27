@@ -37,11 +37,11 @@ macro_rules! try_input_json {
 <% schema.exports.forEach(ex => { -%>
 
 #[no_mangle]
-pub extern "C" fn <%= ex.name %>() -> i32 {
+pub extern "C" fn <%- ex.name %>() -> i32 {
     <% if (ex.output && ex.output.contentType === "application/json") { %>
-    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>  <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| output(Json(x)));
+    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>  <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| output(Json(x)));
     <% } else { %>
-    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %> <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(output);
+    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %> <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(output);
     <% } %>
     match ret {
         Ok(()) => {
@@ -58,23 +58,23 @@ pub extern "C" fn <%= ex.name %>() -> i32 {
     <% if (schema.enum) { %>
 #[derive(Serialize, Deserialize, FromBytes, ToBytes)]
 #[encoding(Json)]
-pub enum <%= capitalize(schema.name) %> {
+pub enum <%- capitalize(schema.name) %> {
     <% schema.enum.forEach(variant => { -%>
     #[serde(rename = "<%- variant %>")]
-    <%= capitalize(variant) %>,
+    <%- capitalize(variant) %>,
 		<% }) %>
 }
     <% } else { %>
 #[derive(Serialize, Deserialize, FromBytes, ToBytes)]
 #[encoding(Json)]
-pub struct <%= capitalize(schema.name) %> {
+pub struct <%- capitalize(schema.name) %> {
     <% schema.properties.forEach(p => { -%>
 		<% if (p.description) { -%>
 		// <%- formatCommentBlock(p.description, "// ") %>
 		<% } -%>
-    #[serde(rename = "<%= p.name %>")]
+    #[serde(rename = "<%- p.name %>")]
     <% if (p.nullable) { %>#[serde(default)]<% } %>
-		<%= makePublic(camelToSnakeCase(p.name)) %>: <%- p.nullable ? `Option<${toRustType(p)}>` : toRustType(p) %>,
+		<%- makePublic(camelToSnakeCase(p.name)) %>: <%- p.nullable ? `Option<${toRustType(p)}>` : toRustType(p) %>,
 		<% }) %>
 
     <% if (schema.additionalProperties) { %>
@@ -85,20 +85,38 @@ pub struct <%= capitalize(schema.name) %> {
     <% } %>
 <% }); %>
 
+mod raw_imports {
+    use super::*;
+    #[host_fn]
+    extern "ExtismHost" {
 <% schema.imports.forEach(imp => { %>
+        pub(crate) fn <%- imp.name %>(<% if (imp.input) { -%>input: <%- jsonWrappedRustType(imp.input) %><%} -%>) <% if (imp.output) { -%> -> <%- jsonWrappedRustType(imp.output) %><% } -%>;
+<% }) %>
+    }
+}
 
+<% schema.imports.forEach(imp => { %>
 <% if (hasComment(imp)) -%>
-// <%= imp.name %> <%= formatCommentBlock(imp.description, "// ") %>
+// <%- imp.name %> <%- formatCommentBlock(imp.description, "// ") %>
 <% if (hasComment(imp.input)) { -%>
 // It takes input of <%- toRustType(imp.input) %> (<%- formatCommentLine(imp.input.description) %>)
 <% } -%>
 <% if (hasComment(imp.output)) { -%>
 // And it returns an output <%- toRustType(imp.output) %> (<%- formatCommentLine(imp.output.description) %>)
 <% } -%>
-#[host_fn]
-extern "ExtismHost" {
-    pub(crate) fn <%= imp.name %>(<% if (imp.input) { -%>input: <%- jsonWrappedRustType(imp.input) %><%} -%>) <% if (imp.output) { -%> -> <%- jsonWrappedRustType(imp.output) %><% } -%>;
-} 
+pub(crate) fn <%- camelToSnakeCase(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
+    let res = unsafe {
+        raw_imports::<%- imp.name %>(
+            <% if (imp.input) { %> <% if (imp.input.contentType === "application/json") { %> Json(input) <%} else {%> input <%}%> <% } %>
+        )?
+    };
 
+    <% if (imp.output && imp.output.contentType === "application/json") { %> 
+    let Json(res) = res;
+    <% } %>
+
+    Ok(res)
+}
 <% }) %>
+
 
