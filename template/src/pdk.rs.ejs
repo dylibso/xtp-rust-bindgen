@@ -23,14 +23,25 @@ macro_rules! try_input {
     }}
 }
 
+macro_rules! try_input_json {
+    () => {{
+        let x = input();
+        match x {
+            Ok(Json(x)) => x,
+            Err(e) => return return_error(e),
+        }
+    }}
+}
+
+
 <% schema.exports.forEach(ex => { -%>
 
 #[no_mangle]
 pub extern "C" fn <%= ex.name %>() -> i32 {
     <% if (ex.output && ex.output.contentType === "application/json") { %>
-    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>try_input!() <% } %>).and_then(|x| output(Json(x)));
+    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>  <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| output(Json(x)));
     <% } else { %>
-    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>try_input!() <% } %>).and_then(output);
+    let ret = crate::<%= camelToSnakeCase(ex.name) %>(<% if (ex.input) { %> <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(output);
     <% } %>
     match ret {
         Ok(()) => {
