@@ -64,4 +64,3 @@ sh bindgen-test.sh run
 
 You should see passing test output or particular test cases that fail for you to
 fix.
-
