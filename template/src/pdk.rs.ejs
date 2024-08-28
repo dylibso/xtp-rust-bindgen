@@ -90,7 +90,7 @@ mod raw_imports {
     #[host_fn]
     extern "ExtismHost" {
 <% schema.imports.forEach(imp => { %>
-        pub(crate) fn <%- imp.name %>(<% if (imp.input) { -%>input: <%- jsonWrappedRustType(imp.input) %><%} -%>) <% if (imp.output) { -%> -> <%- jsonWrappedRustType(imp.output) %><% } -%>;
+        pub(crate) fn <%- imp.name %>(<% if (imp.input) { -%>input: <% if (imp.input.contentType === "application/json") { %><%- jsonWrappedRustType(imp.input) %><%} else {%> <%- toRustType(imp.input) %> <%}%><%} -%>) <% if (imp.output) { -%> -> <% if (imp.output.contentType === "application/json") {%> <%- jsonWrappedRustType(imp.output) %> <%} else {%> <%-toRustType(imp.output) %> <%}%><% } -%>;
 <% }) %>
     }
 }
@@ -104,6 +104,7 @@ mod raw_imports {
 <% if (hasComment(imp.output)) { -%>
 // And it returns an output <%- toRustType(imp.output) %> (<%- formatCommentLine(imp.output.description) %>)
 <% } -%>
+#[allow(unused)]
 pub(crate) fn <%- camelToSnakeCase(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
     let res = unsafe {
         raw_imports::<%- imp.name %>(
