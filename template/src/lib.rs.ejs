@@ -1,10 +1,12 @@
 mod pdk;
-use pdk::*;
 
+use pdk::*;
 use extism_pdk::*;
 
 <% schema.exports.forEach(ex => { -%>
-
+<% if (hasComment(ex)) { -%>
+// <%- formatCommentBlock(ex.description, "// ") %>
+<% } -%>
 pub(crate) fn <%= camelToSnakeCase(ex.name) %>(<%if (ex.input) { %>_input: <%- toRustType(ex.input) %> <% } %>) -> Result<<%if (ex.output) { %> <%- toRustType(ex.output) %> <% } else { %> () <% } %>, Error> {
 	<% if (featureFlags['stub-with-code-samples'] && codeSamples(ex, 'rust').length > 0) { -%>
 		<%- codeSamples(ex, 'rust')[0].source %>
