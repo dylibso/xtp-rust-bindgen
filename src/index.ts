@@ -85,7 +85,7 @@ function capitalize(s: string) {
 }
 
 function camelToSnakeCase(s: string) {
-  return s.split(/(?=[A-Z])/).join('_').toLowerCase()
+  return s.split(/(?=[A-Z])/).join("_").toLowerCase();
 }
 
 export function render() {
@@ -97,7 +97,7 @@ export function render() {
     makePublic,
     jsonWrappedRustType,
     capitalize,
-    camelToSnakeCase
+    camelToSnakeCase,
   };
 
   const output = ejs.render(tmpl, ctx);
