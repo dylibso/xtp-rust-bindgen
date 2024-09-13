@@ -80,14 +80,6 @@ function makePublic(s: string) {
   return "pub " + s;
 }
 
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function camelToSnakeCase(s: string) {
-  return s.split(/(?=[A-Z])/).join("_").toLowerCase();
-}
-
 export function render() {
   const tmpl = Host.inputString();
   const ctx = {
@@ -96,8 +88,6 @@ export function render() {
     toRustType,
     makePublic,
     jsonWrappedRustType,
-    capitalize,
-    camelToSnakeCase,
   };
 
   const output = ejs.render(tmpl, ctx);
