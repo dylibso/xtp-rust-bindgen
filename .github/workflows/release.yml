@@ -16,7 +16,7 @@ jobs:
       - name: Setup Extism
         run: |
           curl -O https://raw.githubusercontent.com/extism/js-pdk/main/install.sh
-          sh install.sh
+          bash install.sh
 
       - name: Set up Node.js
         uses: actions/setup-node@v2

@@ -2,33 +2,36 @@
 
 #![allow(non_snake_case)]
 use extism_pdk::*;
-use serde::{Deserialize, Serialize};
 
-fn return_error(e: Error) -> i32 {
-    let err = format!("{:?}", e);
-    let mem = extism_pdk::Memory::from_bytes(&err).unwrap();
-    unsafe {
-        extism_pdk::extism::error_set(mem.offset());
+pub(crate) mod internal {
+    pub(crate) fn return_error(e: extism_pdk::Error) -> i32 {
+        let err = format!("{:?}", e);
+        let mem = extism_pdk::Memory::from_bytes(&err).unwrap();
+        unsafe {
+            extism_pdk::extism::error_set(mem.offset());
+        }
+        -1
     }
-    -1
 }
 
+#[allow(unused)]
 macro_rules! try_input {
     () => {{
-        let x = input();
+        let x = extism_pdk::input();
         match x {
             Ok(x) => x,
-            Err(e) => return return_error(e),
+            Err(e) => return internal::return_error(e),
         }
     }}
 }
 
+#[allow(unused)]
 macro_rules! try_input_json {
     () => {{
-        let x = input();
+        let x = extism_pdk::input();
         match x {
-            Ok(Json(x)) => x,
-            Err(e) => return return_error(e),
+            Ok(extism_pdk::Json(x)) => x,
+            Err(e) => return internal::return_error(e),
         }
     }}
 }
@@ -37,29 +40,35 @@ use base64_serde::base64_serde_type;
 
 base64_serde_type!(Base64Standard, base64::engine::general_purpose::STANDARD);
 
+
+mod exports {
+    use super::*;
 <% schema.exports.forEach(ex => { -%>
 
 #[no_mangle]
 pub extern "C" fn <%- ex.name %>() -> i32 {
     <% if (ex.output && ex.output.contentType === "application/json") { %>
-    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>  <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| output(Json(x)));
+    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>  <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| extism_pdk::output(extism_pdk::Json(x)));
     <% } else { %>
-    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %> <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(output);
+    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %> <% if (ex.input.contentType === "application/json") { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(extism_pdk::output);
     <% } %>
     match ret {
         Ok(()) => {
             0
         }
         Err(e) => {
-            return_error(e)
+            internal::return_error(e)
         }
     }
 }
 <% }) %>
+}
 
+pub mod types {
+    use super::*;
 <% Object.values(schema.schemas).forEach(schema => { %>
     <% if (schema.enum) { %>
-#[derive(Serialize, Deserialize, FromBytes, ToBytes)]
+#[derive(serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
 #[encoding(Json)]
 pub enum <%- capitalize(schema.name) %> {
     <% schema.enum.forEach(variant => { -%>
@@ -68,7 +77,7 @@ pub enum <%- capitalize(schema.name) %> {
 		<% }) %>
 }
     <% } else { %>
-#[derive(Serialize, Deserialize, FromBytes, ToBytes)]
+#[derive(serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
 #[encoding(Json)]
 pub struct <%- capitalize(schema.name) %> {
     <% schema.properties.forEach(p => { -%>
@@ -88,6 +97,7 @@ pub struct <%- capitalize(schema.name) %> {
 }
     <% } %>
 <% }); %>
+}
 
 mod raw_imports {
     use super::*;
@@ -109,19 +119,17 @@ mod raw_imports {
 // And it returns an output <%- toRustType(imp.output) %> (<%- formatCommentLine(imp.output.description) %>)
 <% } -%>
 #[allow(unused)]
-pub(crate) fn <%- camelToSnakeCase(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
+pub(crate) fn <%- camelToSnakeCase(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> std::result::Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
     let res = unsafe {
         raw_imports::<%- imp.name %>(
-            <% if (imp.input) { %> <% if (imp.input.contentType === "application/json") { %> Json(input) <%} else {%> input <%}%> <% } %>
+            <% if (imp.input) { %> <% if (imp.input.contentType === "application/json") { %> extism_pdk::Json(input) <%} else {%> input <%}%> <% } %>
         )?
     };
 
     <% if (imp.output && imp.output.contentType === "application/json") { %> 
-    let Json(res) = res;
+    let extism_pdk::Json(res) = res;
     <% } %>
 
     Ok(res)
 }
 <% }) %>
-
-

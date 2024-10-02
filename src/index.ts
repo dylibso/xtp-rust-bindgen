@@ -2,7 +2,7 @@ import ejs from "ejs";
 import { getContext, helpers, Property } from "@dylibso/xtp-bindgen";
 
 function toRustType(property: Property): string {
-  if (property.$ref) return property.$ref.name;
+  if (property.$ref) return `types::${helpers.capitalize(property.$ref.name)}`;
   switch (property.type) {
     case "string":
       if (property.format === "date-time") {
@@ -34,7 +34,7 @@ function toRustType(property: Property): string {
 }
 
 function jsonWrappedRustType(property: Property): string {
-  if (property.$ref) return `Json<${property.$ref.name}>`;
+  if (property.$ref) return `Json<types::${helpers.capitalize(property.$ref.name)}>`;
   switch (property.type) {
     case "string":
       if (property.format === "date-time") {
@@ -64,16 +64,6 @@ function jsonWrappedRustType(property: Property): string {
     default:
       throw new Error("Can't convert property to Rust type: " + property.type);
   }
-}
-
-function pointerToRustType(property: Property) {
-  const typ = toRustType(property);
-
-  if (typ.startsWith("[]") || typ.startsWith("map[")) {
-    return typ;
-  }
-
-  return `&${typ}`;
 }
 
 function makePublic(s: string) {
