@@ -82,7 +82,7 @@ pub enum <%- capitalize(schema.name) %> {
 pub struct <%- capitalize(schema.name) %> {
     <% schema.properties.forEach(p => { -%>
 		<% if (p.description) { -%>
-		// <%- formatCommentBlock(p.description, "// ") %>
+		/// <%- formatCommentBlock(p.description, "/// ") %>
 		<% } -%>
     #[serde(rename = "<%- p.name %>")]
     <% if (p.nullable) { %>#[serde(default)]<% } %>
@@ -111,12 +111,12 @@ mod raw_imports {
 
 <% schema.imports.forEach(imp => { %>
 <% if (hasComment(imp)) -%>
-// <%- imp.name %> <%- formatCommentBlock(imp.description, "// ") %>
+/// <%- imp.name %> <%- formatCommentBlock(imp.description, "/// ") %>
 <% if (hasComment(imp.input)) { -%>
-// It takes input of <%- toRustType(imp.input) %> (<%- formatCommentLine(imp.input.description) %>)
+/// It takes input of <%- toRustType(imp.input) %> (<%- formatCommentLine(imp.input.description) %>)
 <% } -%>
 <% if (hasComment(imp.output)) { -%>
-// And it returns an output <%- toRustType(imp.output) %> (<%- formatCommentLine(imp.output.description) %>)
+/// And it returns an output <%- toRustType(imp.output) %> (<%- formatCommentLine(imp.output.description) %>)
 <% } -%>
 #[allow(unused)]
 pub(crate) fn <%- camelToSnakeCase(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> std::result::Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
