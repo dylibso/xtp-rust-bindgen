@@ -85,7 +85,7 @@ pub struct <%- capitalize(schema.name) %> {
 		/// <%- formatCommentBlock(p.description, "/// ") %>
 		<% } -%>
     #[serde(rename = "<%- p.name %>")]
-    <% if (!p.required) { %> #[serde(skip_serializing_if = "Option::is_none")] <% } %>
+    <% if (!p.required && p.nullable) { %> #[serde(skip_serializing_if = "Option::is_none")] <% } %>
     <% if (p.type === "buffer") { %> #[serde(with = "Base64Standard")] <% } %>
 		<%- makePublic(camelToSnakeCase(p.name)) %>: <%- p.nullable || !p.required ? `Option<${toRustType(p)}>` : toRustType(p) %>,
 		<% }) %>
