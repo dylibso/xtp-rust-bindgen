@@ -68,7 +68,7 @@ pub mod types {
     #[derive(serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
     #[encoding(Json)]
     #[serde(transparent)]
-    pub struct Base64(pub #[serde(with = "Base64Standard")] Vec<u8>);
+    pub struct Base64(#[serde(with = "Base64Standard")] pub Vec<u8>);
 
     use super::*;
 <% Object.values(schema.schemas).forEach(schema => { %>
