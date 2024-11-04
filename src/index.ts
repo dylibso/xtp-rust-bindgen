@@ -1,73 +1,69 @@
 import ejs from "ejs";
-import { getContext, helpers, Property } from "@dylibso/xtp-bindgen";
+import { ArrayType, EnumType, getContext, helpers, MapType, ObjectType, Property, XtpNormalizedType, XtpTyped } from "@dylibso/xtp-bindgen";
 
-function toRustType(property: Property): string {
-  if (property.$ref) return `types::${helpers.capitalize(property.$ref.name)}`;
-  switch (property.type) {
-    case "string":
-      if (property.format === "date-time") {
-        return "chrono::DateTime<chrono::Utc>";
-      }
-      return "String";
-    case "number":
-      if (property.format === "float") {
-        return "f32";
-      }
-      if (property.format === "double") {
-        return "f64";
-      }
-      return "i64";
-    case "integer":
-      return "i32";
-    case "boolean":
-      return "bool";
-    case "object":
-      return "std::collections::HashMap<String, serde_json::Value>";
-    case "array":
-      if (!property.items) return "Vec<serde_json::Value>";
-      return `Vec<${toRustType(property.items as Property)}>`;
-    case "buffer":
-      return "Vec<u8>";
-    default:
-      throw new Error("Can't convert property to Rust type: " + property.type);
+function toRustTypeX(type: XtpNormalizedType): string {
+  // turn into reference pointer if needed
+  const optionalize = (t: string) => {
+    return type.nullable ? `Option<${t}>` : t
   }
+
+  switch (type.kind) {
+    case 'string':
+      return optionalize('String')
+    case 'int32':
+      return optionalize('i32')
+    case 'float':
+      return optionalize('f32')
+    case 'double':
+      return optionalize('f64')
+    case 'byte':
+      return optionalize('byte')
+    case 'date-time':
+      return optionalize("chrono::DateTime<chrono::Utc>")
+    case 'boolean':
+      return optionalize('bool')
+    case 'array':
+      const arrayType = type as ArrayType
+      return optionalize(`Vec<${toRustTypeX(arrayType.elementType)}>`)
+    case 'buffer':
+      return optionalize('Vec<u8>')
+    case 'object':
+      const oType = (type as ObjectType)
+      if (oType.properties?.length > 0) {
+        return optionalize(`types::${helpers.capitalize(oType.name)}`)
+      } else {
+        // we're just exposing the serde values directly for backwards compat
+        return optionalize("std::collections::HashMap<String, serde_json::Value>")
+      }
+    case 'enum':
+      return optionalize(`types::${helpers.capitalize((type as EnumType).name)}`)
+    case 'map':
+      const { keyType, valueType } = type as MapType
+      return optionalize(`std::collections::HashMap<${toRustTypeX(keyType)}, ${toRustTypeX(valueType)}>`)
+    default:
+      throw new Error("Can't convert XTP type to Go type: " + type)
+  }
+}
+
+function isOptional(type: String): boolean {
+  return type.startsWith('Option<')
+}
+
+function toRustType(property: XtpTyped, required?: boolean): string {
+  const t = toRustTypeX(property.xtpType)
+
+  // if required is unset, just return what we get back
+  if (required === undefined) return t
+
+  // if it's set and true, just return what we get back
+  if (required) return t
+
+  // otherwise it's false, wrap it in another Option
+  return `Option<${t}>`
 }
 
 function jsonWrappedRustType(property: Property): string {
-  if (property.$ref) return `Json<types::${helpers.capitalize(property.$ref.name)}>`;
-  switch (property.type) {
-    case "string":
-      if (property.format === "date-time") {
-        return "Json<chrono::DateTime<chrono::Utc>>";
-      }
-      return "String";
-    case "number":
-      if (property.format === "float") {
-        return "Json<f32>";
-      }
-      if (property.format === "double") {
-        return "Json<f64>";
-      }
-      return "Json<i64>";
-    case "integer":
-      return "Json<i32>";
-    case "boolean":
-      return "Json<bool>";
-    case "object":
-      return "Json<std::collections::HashMap<String, serde_json::Value>>";
-    case "array":
-      if (!property.items) return "Json<Vec<serde_json::Value>>";
-      // TODO this is not quite right to force cast
-      return `Json<Vec<${toRustType(property.items as Property)}>>`;
-    case "buffer":
-      return "Vec<u8>";
-    default:
-      throw new Error("Can't convert property to Rust type: " + property.type);
-  }
-}
-
-function makePublic(s: string) {
-  return "pub " + s;
+  return `Json<${toRustType(property)}>`
 }
 
 export function render() {
@@ -76,7 +72,7 @@ export function render() {
     ...helpers,
     ...getContext(),
     toRustType,
-    makePublic,
+    isOptional,
     jsonWrappedRustType,
   };
 
