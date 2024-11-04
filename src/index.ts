@@ -41,7 +41,7 @@ function toRustTypeX(type: XtpNormalizedType): string {
       const { keyType, valueType } = type as MapType
       return optionalize(`std::collections::HashMap<${toRustTypeX(keyType)}, ${toRustTypeX(valueType)}>`)
     default:
-      throw new Error("Can't convert XTP type to Go type: " + type)
+      throw new Error("Can't convert XTP type to Rust type: " + type)
   }
 }
 
