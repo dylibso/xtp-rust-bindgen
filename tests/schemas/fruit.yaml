@@ -118,3 +118,23 @@ components:
           "$ref": "#/components/schemas/WriteParams"
           nullable: true
       description: A complex json object
+    RequiredVsNullable:
+      required:
+        - aRequiredNotNullableBoolean
+        - aRequiredNullableBoolean
+      properties:
+        aRequiredNotNullableBoolean:
+          type: boolean
+          description: A not-nullable boolean prop
+        aRequiredNullableBoolean:
+          type: boolean
+          description: A nullable boolean prop
+          nullable: true
+        aNotRequiredNotNullableBoolean:
+          type: boolean
+          description: A not-nullable boolean prop
+        aNotRequiredNullableBoolean:
+          type: boolean
+          description: A nullable boolean prop
+          nullable: true
+      description: A weird little object
