@@ -4,6 +4,10 @@
 #![allow(unused_macros)]
 use extism_pdk::*;
 
+fn panic_if_key_missing() -> ! {
+  panic!("missing key");
+}
+
 pub(crate) mod internal {
     pub(crate) fn return_error(e: extism_pdk::Error) -> i32 {
         let err = format!("{:?}", e);
@@ -88,7 +92,14 @@ pub struct <%- capitalize(schema.name) %> {
 		/// <%- formatCommentBlock(p.description, "/// ") %>
 		<% } -%>
     #[serde(rename = "<%- p.name %>")]
-    <% if (isOptional(propType)) { %>#[serde(default)]<% } %>
+    <% if (isOptional(propType)) { %>
+      <% if (!p.required) { %>
+   #[serde(skip_serializing_if="Option::is_none")]
+   #[serde(default = "panic_if_key_missing")]
+      <% } else { %>
+    #[serde(default)]
+      <% } %>
+    <% } %>
     <% if (isBuffer(p)) { %> #[serde(with = "Base64Standard")] <% } %>
 		pub <%- camelToSnakeCase(p.name) %>: <%- propType %>,
 		<% }) %>

@@ -58,7 +58,9 @@ function toRustType(property: XtpTyped, required?: boolean): string {
   // if it's set and true, just return what we get back
   if (required) return t
 
-  // otherwise it's false, wrap it in another Option
+  // otherwise it's false, assuming it's not already,
+  // wrap it in an Option
+  if (t.startsWith('Option<')) return t
   return `Option<${t}>`
 }
 
