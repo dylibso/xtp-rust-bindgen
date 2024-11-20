@@ -4,6 +4,7 @@
 #![allow(unused_macros)]
 use extism_pdk::*;
 
+#[allow(unused)]
 fn panic_if_key_missing() -> ! {
   panic!("missing key");
 }
@@ -95,9 +96,9 @@ pub struct <%- capitalize(schema.name) %> {
     <% if (isOptional(propType)) { %>
       <% if (!p.required) { %>
    #[serde(skip_serializing_if="Option::is_none")]
-   #[serde(default = "panic_if_key_missing")]
+   #[serde(default)]
       <% } else { %>
-    #[serde(default)]
+   #[serde(default = "panic_if_key_missing")]
       <% } %>
     <% } %>
     <% if (isBuffer(p)) { %> #[serde(with = "Base64Standard")] <% } %>
