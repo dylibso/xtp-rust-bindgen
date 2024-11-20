@@ -1,5 +1,19 @@
-import ejs from "ejs";
-import { ArrayType, EnumType, getContext, helpers, MapType, ObjectType, Property, XtpNormalizedType, XtpTyped } from "@dylibso/xtp-bindgen";
+import ejs from 'ejs';
+import { ArrayType, EnumType, getContext, helpers, MapType, ObjectType, Property, XtpNormalizedType, XtpTyped } from '@dylibso/xtp-bindgen';
+
+let KEYWORDS: Set<string>
+
+function formatIdentifier(ident: string): string {
+  // keywords via https://doc.rust-lang.org/reference/keywords.html
+  // lazy init because of extism-js constraints
+  KEYWORDS = KEYWORDS || new Set(['as', 'break', 'const', 'continue', 'crate', 'else', 'enum', 'extern', 'false', 'fn', 'for', 'if', 'impl', 'in', 'let', 'loop', 'match', 'mod', 'move', 'mut', 'pub', 'ref', 'return', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where', 'while', 'async', 'await', 'dyn', 'abstract', 'become', 'box', 'do', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual', 'yield', 'try', 'macro_rules', 'union', 'dyn'])
+
+  if (KEYWORDS.has(ident)) {
+    return `r#${ident}`
+  }
+
+  return helpers.camelToSnakeCase(ident)
+}
 
 function toRustTypeX(type: XtpNormalizedType): string {
   // turn into reference pointer if needed
@@ -19,7 +33,7 @@ function toRustTypeX(type: XtpNormalizedType): string {
     case 'byte':
       return optionalize('byte')
     case 'date-time':
-      return optionalize("chrono::DateTime<chrono::Utc>")
+      return optionalize('chrono::DateTime<chrono::Utc>')
     case 'boolean':
       return optionalize('bool')
     case 'array':
@@ -33,15 +47,15 @@ function toRustTypeX(type: XtpNormalizedType): string {
         return optionalize(`types::${helpers.capitalize(oType.name)}`)
       } else {
         // we're just exposing the serde values directly for backwards compat
-        return optionalize("std::collections::HashMap<String, serde_json::Value>")
+        return optionalize('serde_json::Map<String, serde_json::Value>')
       }
     case 'enum':
       return optionalize(`types::${helpers.capitalize((type as EnumType).name)}`)
     case 'map':
       const { keyType, valueType } = type as MapType
-      return optionalize(`std::collections::HashMap<${toRustTypeX(keyType)}, ${toRustTypeX(valueType)}>`)
+      return optionalize(`serde_json::Map<${toRustTypeX(keyType)}, ${toRustTypeX(valueType)}>`)
     default:
-      throw new Error("Can't convert XTP type to Rust type: " + type)
+      throw new Error(`Can't convert XTP type to Rust type: "${type}"`)
   }
 }
 
@@ -73,6 +87,7 @@ export function render() {
   const ctx = {
     ...helpers,
     ...getContext(),
+    formatIdentifier,
     toRustType,
     isOptional,
     jsonWrappedRustType,

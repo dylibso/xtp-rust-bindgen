@@ -53,9 +53,9 @@ mod exports {
 #[no_mangle]
 pub extern "C" fn <%- ex.name %>() -> i32 {
     <% if (ex.output && isJsonEncoded(ex.output)) { %>
-    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %>  <% if (isJsonEncoded(ex.input)) { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| extism_pdk::output(extism_pdk::Json(x)));
+    let ret = crate::<%- formatIdentifier(ex.name) %>(<% if (ex.input) { %>  <% if (isJsonEncoded(ex.input)) { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| extism_pdk::output(extism_pdk::Json(x)));
     <% } else { %>
-    let ret = crate::<%- camelToSnakeCase(ex.name) %>(<% if (ex.input) { %> <% if (isJsonEncoded(ex.input)) { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(extism_pdk::output);
+    let ret = crate::<%- formatIdentifier(ex.name) %>(<% if (ex.input) { %> <% if (isJsonEncoded(ex.input)) { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(extism_pdk::output);
     <% } %>
     match ret {
         Ok(()) => {
@@ -101,7 +101,7 @@ pub struct <%- capitalize(schema.name) %> {
       <% } %>
     <% } %>
     <% if (isBuffer(p)) { %> #[serde(with = "Base64Standard")] <% } %>
-		pub <%- camelToSnakeCase(p.name) %>: <%- propType %>,
+		pub <%- formatIdentifier(p.name) %>: <%- propType %>,
 		<% }) %>
 }
     <% } %>
@@ -128,7 +128,7 @@ mod raw_imports {
 /// And it returns an output <%- toRustType(imp.output) %> (<%- formatCommentLine(imp.output.description) %>)
 <% } -%>
 #[allow(unused)]
-pub(crate) fn <%- camelToSnakeCase(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> std::result::Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
+pub(crate) fn <%- formatIdentifier(imp.name) %>(<% if (imp.input) { -%>input: <%- toRustType(imp.input) %><%} -%>) -> std::result::Result<<% if (imp.output) { -%><%- toRustType(imp.output) %><% } else { -%> () <% } %> , extism_pdk::Error>  {
     let res = unsafe {
         raw_imports::<%- imp.name %>(
             <% if (imp.input) { %> <% if (isJsonEncoded(imp.input)) { %> extism_pdk::Json(input) <%} else {%> input <%}%> <% } %>
