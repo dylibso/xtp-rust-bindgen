@@ -7,11 +7,11 @@ use extism_pdk::*;
 <% if (hasComment(ex)) { -%>
 // <%- formatCommentBlock(ex.description, "// ") %>
 <% } -%>
-pub(crate) fn <%= camelToSnakeCase(ex.name) %>(<%if (ex.input) { %>_input: <%- toRustType(ex.input) %> <% } %>) -> Result<<%if (ex.output) { %> <%- toRustType(ex.output) %> <% } else { %> () <% } %>, Error> {
+pub(crate) fn <%= formatIdentifier(ex.name) %>(<%if (ex.input) { %>_input: <%- toRustType(ex.input) %> <% } %>) -> Result<<%if (ex.output) { %> <%- toRustType(ex.output) %> <% } else { %> () <% } %>, Error> {
 	<% if (featureFlags['stub-with-code-samples'] && codeSamples(ex, 'rust').length > 0) { -%>
 		<%- codeSamples(ex, 'rust')[0].source %>
 	<% } else { -%>
-    todo!("Implement <%= camelToSnakeCase(ex.name) %>")
+    todo!("Implement <%= formatIdentifier(ex.name) %>")
 	<% } -%>
 }
 
