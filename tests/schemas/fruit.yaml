@@ -38,6 +38,19 @@ exports:
     output:
       contentType: application/json
       $ref: "#/components/schemas/ComplexObject"
+  fn:
+    description: |
+      Try to land on a keyword. Just try it.
+    codeSamples:
+    - lang: typescript
+      source: |
+        return { ghost: GhostGang.inky, aBoolean: true, aString: "okay", anInt: 123 }
+    input:
+      contentType: application/json
+      $ref: "#/components/schemas/impl"
+    output:
+      contentType: application/json
+      $ref: "#/components/schemas/ComplexObject"
 imports:
   eatAFruit:
     input:
@@ -69,6 +82,15 @@ imports:
 version: v1-draft
 components:
   schemas:
+    impl:
+      properties:
+        struct:
+          type: string
+          description: a keyword
+        await:
+          type: string
+          description: another keyword
+      description: Really try to land on a keyword please
     WriteParams:
       properties:
         key:
@@ -84,6 +106,8 @@ components:
       - orange
       - banana
       - strawberry
+      - mod
+      - use
       description: A set of available fruits you can consume
     GhostGang:
       enum:
@@ -97,6 +121,15 @@ components:
         ghost:
           "$ref": "#/components/schemas/GhostGang"
           description: I can override the description for the property here
+        mod:
+          type: boolean
+          description: A boolean prop
+        use:
+          type: boolean
+          description: A boolean prop
+        await:
+          type: boolean
+          description: A boolean prop
         aBoolean:
           type: boolean
           description: A boolean prop

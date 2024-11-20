@@ -1,13 +1,17 @@
 import ejs from 'ejs';
 import { ArrayType, EnumType, getContext, helpers, MapType, ObjectType, Property, XtpNormalizedType, XtpTyped } from '@dylibso/xtp-bindgen';
 
-let KEYWORDS: Set<string>
+// keywords via https://doc.rust-lang.org/reference/keywords.html
+let KEYWORDS: Set<string> = new Set(['as', 'break', 'const', 'continue', 'crate', 'else', 'enum', 'extern', 'false', 'fn', 'for', 'if', 'impl', 'in', 'let', 'loop', 'match', 'mod', 'move', 'mut', 'pub', 'ref', 'return', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where', 'while', 'async', 'await', 'dyn', 'abstract', 'become', 'box', 'do', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual', 'yield', 'try', 'macro_rules', 'union', 'dyn'])
+
+function formatExternIdentifier(ident: string) {
+  if (KEYWORDS.has(ident)) {
+    return `r#${ident}`
+  }
+  return ident
+}
 
 function formatIdentifier(ident: string): string {
-  // keywords via https://doc.rust-lang.org/reference/keywords.html
-  // lazy init because of extism-js constraints
-  KEYWORDS = KEYWORDS || new Set(['as', 'break', 'const', 'continue', 'crate', 'else', 'enum', 'extern', 'false', 'fn', 'for', 'if', 'impl', 'in', 'let', 'loop', 'match', 'mod', 'move', 'mut', 'pub', 'ref', 'return', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where', 'while', 'async', 'await', 'dyn', 'abstract', 'become', 'box', 'do', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual', 'yield', 'try', 'macro_rules', 'union', 'dyn'])
-
   if (KEYWORDS.has(ident)) {
     return `r#${ident}`
   }
@@ -88,6 +92,7 @@ export function render() {
     ...helpers,
     ...getContext(),
     formatIdentifier,
+    formatExternIdentifier,
     toRustType,
     isOptional,
     jsonWrappedRustType,
