@@ -51,7 +51,7 @@ mod exports {
 <% schema.exports.forEach(ex => { -%>
 
 #[no_mangle]
-pub extern "C" fn <%- ex.name %>() -> i32 {
+pub extern "C" fn <%- formatExternIdentifier(ex.name) %>() -> i32 {
     <% if (ex.output && isJsonEncoded(ex.output)) { %>
     let ret = crate::<%- formatIdentifier(ex.name) %>(<% if (ex.input) { %>  <% if (isJsonEncoded(ex.input)) { %> try_input_json!() <% } else { %> try_input!() <% } %> <% } %>).and_then(|x| extism_pdk::output(extism_pdk::Json(x)));
     <% } else { %>
@@ -113,7 +113,7 @@ mod raw_imports {
     #[host_fn]
     extern "ExtismHost" {
 <% schema.imports.forEach(imp => { %>
-        pub(crate) fn <%- imp.name %>(<% if (imp.input) { -%>input: <% if (isJsonEncoded(imp.input)) { %><%- jsonWrappedRustType(imp.input) %><%} else {%> <%- toRustType(imp.input) %> <%}%><%} -%>) <% if (imp.output) { -%> -> <% if (isJsonEncoded(imp.output)) {%> <%- jsonWrappedRustType(imp.output) %> <%} else {%> <%-toRustType(imp.output) %> <%}%><% } -%>;
+        pub(crate) fn <%- formatExternIdentifier(imp.name) %>(<% if (imp.input) { -%>input: <% if (isJsonEncoded(imp.input)) { %><%- jsonWrappedRustType(imp.input) %><%} else {%> <%- toRustType(imp.input) %> <%}%><%} -%>) <% if (imp.output) { -%> -> <% if (isJsonEncoded(imp.output)) {%> <%- jsonWrappedRustType(imp.output) %> <%} else {%> <%-toRustType(imp.output) %> <%}%><% } -%>;
 <% }) %>
     }
 }
