@@ -30,6 +30,8 @@ function toRustTypeX(type: XtpNormalizedType): string {
       return optionalize('String')
     case 'int32':
       return optionalize('i32')
+    case 'int64':
+      return optionalize('i64')
     case 'float':
       return optionalize('f32')
     case 'double':
@@ -59,7 +61,7 @@ function toRustTypeX(type: XtpNormalizedType): string {
       const { keyType, valueType } = type as MapType
       return optionalize(`serde_json::Map<${toRustTypeX(keyType)}, ${toRustTypeX(valueType)}>`)
     default:
-      throw new Error(`Can't convert XTP type to Rust type: "${type}"`)
+      throw new Error(`Can't convert XTP type to Rust type: "${JSON.stringify(type)}"`)
   }
 }
 

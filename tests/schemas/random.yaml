@@ -293,7 +293,6 @@ imports:
       contentType: application/json
       description: Nested reference input
     output:
-      type: object
       contentType: application/json
       description: Nested output structure
       "$ref": "#/components/schemas/NestedObject"
