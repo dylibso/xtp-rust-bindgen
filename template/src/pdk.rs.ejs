@@ -74,7 +74,7 @@ pub mod types {
     use super::*;
 <% Object.values(schema.schemas).forEach(schema => { %>
     <% if (isEnum(schema)) { %>
-#[derive(Default, serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
+#[derive(Default, Debug, Clone, serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
 #[encoding(Json)]
 pub enum <%- capitalize(schema.name) %> {
     #[default]
@@ -84,7 +84,7 @@ pub enum <%- capitalize(schema.name) %> {
 		<% }) %>
 }
     <% } else { %>
-#[derive(Default, serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
+#[derive(Default, Debug, Clone, serde::Serialize, serde::Deserialize, extism_pdk::FromBytes, extism_pdk::ToBytes)]
 #[encoding(Json)]
 pub struct <%- capitalize(schema.name) %> {
     <% schema.properties.forEach(p => { -%>
