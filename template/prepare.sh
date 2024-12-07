@@ -49,6 +49,7 @@ if ! (rustup target list --installed | grep -q '^wasm32-wasip1$'); then
     echo "Update rustup with:"
     echo "👉 rustup update"
     echo ""
+    exit 1
   fi
 fi
 
