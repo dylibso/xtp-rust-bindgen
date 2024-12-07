@@ -33,6 +33,7 @@ if ! (command_exists rustup); then
   echo "❌ rustup is missing. Check your rust installation."
   echo ""
 elif ! (rustup target list --installed | grep -q '^wasm32-wasip1$'); then
+  rustup target add wasm32-unknown-unknown
   if ! (rustup target add wasm32-wasip1); then
     missing_deps=1
     echo "❌ error cncountered while adding target \"wasm32-wasip1\""
