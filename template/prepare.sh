@@ -32,16 +32,6 @@ if ! (command_exists rustup); then
   missing_deps=1
   echo "❌ rustup is missing. Check your rust installation."
   echo ""
-elif ! (rustup target list --installed | grep -q '^wasm32-wasip1$'); then
-  rustup target add wasm32-unknown-unknown
-  if ! (rustup target add wasm32-wasip1); then
-    missing_deps=1
-    echo "❌ error cncountered while adding target \"wasm32-wasip1\""
-    echo ""
-    echo "Update rustup with:"
-    echo "👉 rustup update"
-    echo ""
-  fi
 fi
 
 # Exit with a bad exit code if any dependencies are missing
@@ -52,5 +42,16 @@ if [ "$missing_deps" -ne 0 ]; then
   exit 1
 fi
 
+if ! (rustup target list --installed | grep -q '^wasm32-wasip1$'); then
+  if ! (rustup target add wasm32-wasip1); then
+    echo "❌ error cncountered while adding target \"wasm32-wasip1\""
+    echo ""
+    echo "Update rustup with:"
+    echo "👉 rustup update"
+    echo ""
+  fi
+fi
 
-
+if ! (rustup target list --installed | grep -q '^wasm32-unknown-unknown$'); then
+  rustup target add wasm32-unknown-unknown
+fi
