@@ -44,7 +44,7 @@ fi
 
 if ! (rustup target list --installed | grep -q '^wasm32-wasip1$'); then
   if ! (rustup target add wasm32-wasip1); then
-    echo "❌ error cncountered while adding target \"wasm32-wasip1\""
+    echo "❌ error encountered while adding target \"wasm32-wasip1\""
     echo ""
     echo "Update rustup with:"
     echo "👉 rustup update"
