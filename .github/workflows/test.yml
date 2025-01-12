@@ -15,8 +15,7 @@ jobs:
 
       - name: Setup Extism and XTP
         run: |
-          curl -O https://raw.githubusercontent.com/extism/js-pdk/main/install.sh
-          bash install.sh
+          curl -L https://raw.githubusercontent.com/extism/js-pdk/main/install.sh | bash -s v1.3.3
           curl https://static.dylibso.com/cli/install.sh | bash
 
       - name: Set up Node.js
@@ -48,6 +47,7 @@ jobs:
 
       - name: Run Bindgen Test
         run: |
+          extism-js --version
           sh bindgen-test.sh install
           sh bindgen-test.sh run
 
