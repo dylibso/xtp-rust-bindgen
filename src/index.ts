@@ -1,5 +1,5 @@
 import ejs from 'ejs';
-import { ArrayType, EnumType, getContext, helpers, MapType, ObjectType, Property, XtpNormalizedType, XtpTyped } from '@dylibso/xtp-bindgen';
+import { ArrayType, EnumType, getContext, helpers, MapType, FreeFormObjectType, ObjectType, Property, XtpNormalizedType, XtpTyped } from '@dylibso/xtp-bindgen';
 
 // keywords via https://doc.rust-lang.org/reference/keywords.html
 let KEYWORDS: Set<string> = new Set(['as', 'break', 'const', 'continue', 'crate', 'else', 'enum', 'extern', 'false', 'fn', 'for', 'if', 'impl', 'in', 'let', 'loop', 'match', 'mod', 'move', 'mut', 'pub', 'ref', 'return', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where', 'while', 'async', 'await', 'dyn', 'abstract', 'become', 'box', 'do', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual', 'yield', 'try', 'macro_rules', 'union', 'dyn'])
@@ -36,8 +36,6 @@ function toRustTypeX(type: XtpNormalizedType): string {
       return optionalize('f32')
     case 'double':
       return optionalize('f64')
-    case 'byte':
-      return optionalize('byte')
     case 'date-time':
       return optionalize('chrono::DateTime<chrono::Utc>')
     case 'boolean':
@@ -49,12 +47,10 @@ function toRustTypeX(type: XtpNormalizedType): string {
       return optionalize('Vec<u8>')
     case 'object':
       const oType = (type as ObjectType)
-      if (oType.properties?.length > 0) {
-        return optionalize(`types::${helpers.capitalize(oType.name)}`)
-      } else {
-        // we're just exposing the serde values directly for backwards compat
-        return optionalize('serde_json::Map<String, serde_json::Value>')
-      }
+      return optionalize(`types::${helpers.capitalize(oType.name)}`)
+    case 'free-form-object':
+      // we're just exposing the serde values directly for backwards compat
+      return optionalize('serde_json::Map<String, serde_json::Value>')
     case 'enum':
       return optionalize(`types::${helpers.capitalize((type as EnumType).name)}`)
     case 'map':
