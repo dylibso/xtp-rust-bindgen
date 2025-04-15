@@ -36,8 +36,6 @@ function toRustTypeX(type: XtpNormalizedType): string {
       return optionalize('f32')
     case 'double':
       return optionalize('f64')
-    case 'byte':
-      return optionalize('byte')
     case 'date-time':
       return optionalize('chrono::DateTime<chrono::Utc>')
     case 'boolean':
